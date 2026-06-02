@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobRadar — Romario's Job Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0f1a;
+  --bg2:      #111627;
+  --bg3:      #171e30;
+  --border:   #1e2940;
+  --border2:  #263350;
+  --text:     #e4e8f2;
+  --muted:    #6b7899;
+  --muted2:   #4a5470;
+  --accent:   #f0b429;
+  --accent2:  #e09010;
+  --blue:     #3b82f6;
+  --green:    #22c55e;
+  --red:      #ef4444;
+  --teal:     #14b8a6;
+  --radius:   10px;
+  --radius-lg:16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── HEADER ── */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 8px var(--accent);
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.api-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  width: 260px;
+  outline: none;
+  transition: border-color .2s;
+}
+.api-input:focus { border-color: var(--accent); }
+.api-input::placeholder { color: var(--muted2); }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: calc(100vh - 58px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 20px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-section { display: flex; flex-direction: column; gap: 8px; }
+
+.filter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.filter-group { display: flex; flex-direction: column; gap: 5px; }
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s;
+  user-select: none;
+}
+.check-row:hover { background: var(--bg3); }
+.check-row input[type=checkbox] {
+  width: 14px; height: 14px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.check-row span { font-size: 12.5px; color: var(--text); }
+
+.range-wrap { display: flex; flex-direction: column; gap: 6px; }
+.range-row { display: flex; align-items: center; justify-content: space-between; }
+.range-row label { font-size: 12px; color: var(--muted); }
+.range-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--border2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent2);
+}
+
+.search-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #0c0f1a;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: .03em;
+  transition: background .2s, transform .1s, box-shadow .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.search-btn:hover:not(:disabled) {
+  background: #f5c442;
+  box-shadow: 0 0 20px rgba(240,180,41,.35);
+}
+.search-btn:active:not(:disabled) { transform: scale(.98); }
+.search-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.clear-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.clear-btn:hover { border-color: var(--border2); color: var(--text); }
+
+.select-filter {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.select-filter:focus { border-color: var(--accent); }
+
+/* ── MAIN ── */
+.main { display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat {
+  flex: 1;
+  background: var(--bg2);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-val.gold { color: var(--accent); }
+.stat-val.green { color: var(--green); }
+.stat-val.blue { color: var(--blue); }
+.stat-val.muted { color: var(--muted); }
+.stat-label { font-size: 11px; color: var(--muted); letter-spacing: .03em; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+
+.tabs { display: flex; gap: 4px; }
+.tab {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  background: transparent;
+  color: var(--muted);
+}
+.tab.active {
+  background: var(--bg3);
+  border-color: var(--border2);
+  color: var(--text);
+}
+.tab-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+.tab.active .tab-count.gold { background: rgba(240,180,41,.15); color: var(--accent); }
+.tab.active .tab-count.teal { background: rgba(20,184,166,.15); color: var(--teal); }
+
+.spacer { flex: 1; }
+
+.sort-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.sort-select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+.result-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── JOB LIST ── */
+.job-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── JOB CARD ── */
+.job-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color .2s, transform .15s;
+  position: relative;
+  overflow: hidden;
+}
+.job-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 2px 0 0 2px;
+}
+.job-card.score-high::before { background: var(--accent); }
+.job-card.score-mid::before  { background: var(--teal); }
+.job-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+
+.score-badge {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1;
+}
+.score-badge.high {
+  background: rgba(240,180,41,.12);
+  color: var(--accent);
+  border: 1px solid rgba(240,180,41,.25);
+}
+.score-badge.mid {
+  background: rgba(20,184,166,.1);
+  color: var(--teal);
+  border: 1px solid rgba(20,184,166,.2);
+}
+.score-badge span { font-size: 9px; font-family: 'DM Mono', monospace; font-weight: 400; color: var(--muted); }
+
+.job-body { flex: 1; min-width: 0; }
+.job-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.job-company {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.job-company strong { color: var(--text); font-weight: 500; }
+.job-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.tag.lang-en  { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.2); }
+.tag.lang-de  { background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.18); }
+.tag.type     { background: rgba(34,197,94,.1); color: #4ade80; border: 1px solid rgba(34,197,94,.18); }
+.tag.tool     { background: rgba(168,85,247,.1); color: #c084fc; border: 1px solid rgba(168,85,247,.18); }
+.tag.exp      { background: rgba(107,114,153,.15); color: var(--muted); border: 1px solid var(--border); }
+.tag.source   { background: var(--bg3); color: var(--muted2); border: 1px solid var(--border); }
+.tag.date     { background: transparent; color: var(--muted2); border: none; font-size: 10px; }
+
+.job-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+  flex-direction: column;
+}
+
+.btn-apply {
+  padding: 7px 14px;
+  background: var(--accent);
+  color: #0c0f1a;
+  border: none;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+.btn-apply:hover { background: #f5c442; }
+
+.btn-save {
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-save:hover { border-color: var(--green); color: var(--green); }
+.btn-save.saved { border-color: var(--green); color: var(--green); background: rgba(34,197,94,.08); }
+
+/* ── EMPTY / LOADING / ERROR STATES ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: var(--muted);
+  text-align: center;
+}
+.empty-icon {
+  width: 48px; height: 48px;
+  border: 1.5px solid var(--border2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--muted2);
+}
+.empty-state h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.empty-state p { font-size: 13px; max-width: 300px; }
+
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 2.5px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-msg {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.loading-sub { font-size: 12px; color: var(--muted2); }
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap {
+  height: 2px;
+  background: var(--border);
+  overflow: hidden;
+  display: none;
+}
+.progress-bar-wrap.active { display: block; }
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width .4s ease;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 11px 16px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 9999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all .3s ease;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.info    { border-left: 3px solid var(--accent); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+}
+.modal h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.modal p { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-btn {
+  padding: 8px 18px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  transition: all .15s;
+}
+.modal-btn.primary {
+  background: var(--accent);
+  color: #0c0f1a;
+  border-color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+}
+.modal-btn.primary:hover { background: #f5c442; }
+.modal-btn:hover:not(.primary) { background: var(--bg3); }
+
+/* ── SUMMARY NOTE ── */
+.summary-note {
+  margin: 0 20px 12px;
+  padding: 10px 14px;
+  background: rgba(240,180,41,.06);
+  border: 1px solid rgba(240,180,41,.18);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: none;
+}
+.summary-note.show { display: block; }
+.summary-note strong { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <span class="logo-dot"></span>
+    JobRadar
+  </div>
+  <div class="header-right">
+    <input class="api-input" id="apiKey" type="password" placeholder="Paste your Anthropic API key here…">
+    <button class="modal-btn primary" style="padding:7px 14px;font-size:12px" onclick="openHelp()">How to use</button>
+  </div>
+</header>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-wrap" id="progressWrap">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- SEARCH BUTTON -->
+    <button class="search-btn" id="searchBtn" onclick="runSearch()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search Jobs
+    </button>
+
+    <!-- JOB TITLES -->
+    <div class="filter-section">
+      <div class="filter-label">Job Titles</div>
+      <div class="filter-group" id="titleFilters">
+        <label class="check-row"><input type="checkbox" value="Finance Business Partner" checked><span>Finance Business Partner</span></label>
+        <label class="check-row"><input type="checkbox" value="Junior Finance Business Partner" checked><span>Junior Finance Business Partner</span></label>
+        <label class="check-row"><input type="checkbox" value="FP&A Analyst" checked><span>FP&A Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="Financial Planning Analyst" checked><span>Financial Planning Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="Financial Analyst" checked><span>Financial Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="Commercial Finance Analyst" checked><span>Commercial Finance Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="Business Controller" checked><span>Business Controller</span></label>
+        <label class="check-row"><input type="checkbox" value="Controlling Analyst" checked><span>Controlling Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="Junior Controller" checked><span>Junior Controller</span></label>
+        <label class="check-row"><input type="checkbox" value="Corporate Finance Analyst" checked><span>Corporate Finance Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="SAP Controlling Analyst" checked><span>SAP Controlling Analyst</span></label>
+        <label class="check-row"><input type="checkbox" value="Reporting Analyst Finance" checked><span>Reporting Analyst Finance</span></label>
+        <label class="check-row"><input type="checkbox" value="Cost Controller" checked><span>Cost Controller</span></label>
+        <label class="check-row"><input type="checkbox" value="Finance Operations Analyst" checked><span>Finance Operations Analyst</span></label>
+      </div>
+    </div>
+
+    <!-- SOURCES -->
+    <div class="filter-section">
+      <div class="filter-label">Sources</div>
+      <div class="filter-group">
+        <label class="check-row"><input type="checkbox" id="src-linkedin" value="LinkedIn" checked><span>LinkedIn Jobs</span></label>
+        <label class="check-row"><input type="checkbox" id="src-indeed" value="Indeed Germany" checked><span>Indeed Germany</span></label>
+        <label class="check-row"><input type="checkbox" id="src-stepstone" value="Stepstone" checked><span>Stepstone</span></label>
+        <label class="check-row"><input type="checkbox" id="src-glassdoor" value="Glassdoor" checked><span>Glassdoor</span></label>
+        <label class="check-row"><input type="checkbox" id="src-company" value="Company Portals" checked><span>Company Portals (DAX 150)</span></label>
+      </div>
+    </div>
+
+    <!-- MIN RATING -->
+    <div class="filter-section">
+      <div class="filter-label">Minimum Score</div>
+      <div class="range-wrap">
+        <div class="range-row">
+          <label>Show jobs scoring at least</label>
+          <span class="range-val" id="minScoreVal">3</span>
+        </div>
+        <input type="range" id="minScore" min="1" max="9" value="3"
+          oninput="document.getElementById('minScoreVal').textContent=this.value">
+      </div>
+    </div>
+
+    <!-- LANGUAGE -->
+    <div class="filter-section">
+      <div class="filter-label">Language Requirement</div>
+      <div class="filter-group">
+        <label class="check-row"><input type="checkbox" value="en-only" checked><span>English only (no German req.)</span></label>
+        <label class="check-row"><input type="checkbox" value="en-de" checked><span>English + German (any level)</span></label>
+        <label class="check-row"><input type="checkbox" value="de-only"><span>German only</span></label>
+      </div>
+    </div>
+
+    <!-- GERMAN LEVEL MAX -->
+    <div class="filter-section">
+      <div class="filter-label">Max German Level Required</div>
+      <select class="select-filter" id="maxGermanLevel">
+        <option value="any">Any level</option>
+        <option value="B2" selected>Up to B2</option>
+        <option value="C1">Up to C1</option>
+        <option value="C2">Up to C2</option>
+      </select>
+    </div>
+
+    <!-- EMPLOYMENT TYPE -->
+    <div class="filter-section">
+      <div class="filter-label">Employment Type</div>
+      <div class="filter-group">
+        <label class="check-row"><input type="checkbox" value="Full-time" checked><span>Full-time only</span></label>
+        <label class="check-row"><input type="checkbox" value="Working Student"><span>Working Student</span></label>
+        <label class="check-row"><input type="checkbox" value="Part-time"><span>Part-time</span></label>
+      </div>
+    </div>
+
+    <!-- EXPERIENCE LEVEL -->
+    <div class="filter-section">
+      <div class="filter-label">Experience Required</div>
+      <div class="filter-group">
+        <label class="check-row"><input type="checkbox" value="0-1" checked><span>0–1 years</span></label>
+        <label class="check-row"><input type="checkbox" value="0-3" checked><span>0–3 years</span></label>
+        <label class="check-row"><input type="checkbox" value="3-5"><span>3–5 years</span></label>
+        <label class="check-row"><input type="checkbox" value="5+"><span>5+ years</span></label>
+      </div>
+    </div>
+
+    <!-- TECH SKILLS -->
+    <div class="filter-section">
+      <div class="filter-label">Required Tech Skills</div>
+      <div class="filter-group">
+        <label class="check-row"><input type="checkbox" value="SAP" checked><span>SAP (any module)</span></label>
+        <label class="check-row"><input type="checkbox" value="Power BI" checked><span>Power BI</span></label>
+        <label class="check-row"><input type="checkbox" value="Advanced Excel" checked><span>Advanced Excel</span></label>
+        <label class="check-row"><input type="checkbox" value="Odoo" checked><span>Odoo</span></label>
+        <label class="check-row"><input type="checkbox" value="SAP BW" checked><span>SAP BW / SAC</span></label>
+        <label class="check-row"><input type="checkbox" value="any-skills"><span>Any / Not specified</span></label>
+      </div>
+    </div>
+
+    <!-- INDUSTRY -->
+    <div class="filter-section">
+      <div class="filter-label">Industry Focus</div>
+      <div class="filter-group">
+        <label class="check-row"><input type="checkbox" value="any-industry" checked><span>All industries</span></label>
+        <label class="check-row"><input type="checkbox" value="FMCG/Manufacturing"><span>FMCG / Manufacturing</span></label>
+        <label class="check-row"><input type="checkbox" value="Technology"><span>Technology</span></label>
+        <label class="check-row"><input type="checkbox" value="Finance/Banking"><span>Finance / Banking</span></label>
+        <label class="check-row"><input type="checkbox" value="Pharma/Biotech"><span>Pharma / Biotech</span></label>
+        <label class="check-row"><input type="checkbox" value="Consulting"><span>Consulting</span></label>
+      </div>
+    </div>
+
+    <!-- LOCATION -->
+    <div class="filter-section">
+      <div class="filter-label">Location</div>
+      <select class="select-filter" id="locationFilter">
+        <option value="Germany">All of Germany</option>
+        <option value="Berlin">Berlin</option>
+        <option value="Munich">Munich</option>
+        <option value="Hamburg">Hamburg</option>
+        <option value="Frankfurt">Frankfurt</option>
+        <option value="Cologne">Cologne</option>
+        <option value="Düsseldorf">Düsseldorf</option>
+        <option value="Stuttgart">Stuttgart</option>
+        <option value="Remote">Remote only</option>
+        <option value="Hybrid">Hybrid</option>
+      </select>
+    </div>
+
+    <button class="clear-btn" onclick="clearResults()">Clear results</button>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- STATS -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat"><div class="stat-val gold" id="statTotal">0</div><div class="stat-label">Total found</div></div>
+      <div class="stat"><div class="stat-val green" id="statStrong">0</div><div class="stat-label">Strong matches (5+)</div></div>
+      <div class="stat"><div class="stat-val blue" id="statPossible">0</div><div class="stat-label">Possible matches (3–4)</div></div>
+      <div class="stat"><div class="stat-val muted" id="statDiscarded">0</div><div class="stat-label">Discarded</div></div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab active" id="tabStrong" onclick="switchTab('strong')">
+          Strong matches <span class="tab-count gold" id="countStrong">0</span>
+        </button>
+        <button class="tab" id="tabPossible" onclick="switchTab('possible')">
+          Possible matches <span class="tab-count teal" id="countPossible">0</span>
+        </button>
+      </div>
+      <div class="spacer"></div>
+      <span class="sort-label">Sort by</span>
+      <select class="sort-select" id="sortSelect" onchange="renderJobs()">
+        <option value="score-desc">Score ↓</option>
+        <option value="score-asc">Score ↑</option>
+        <option value="date-desc">Newest first</option>
+        <option value="company-asc">Company A–Z</option>
+        <option value="title-asc">Title A–Z</option>
+      </select>
+      <span class="result-count" id="resultCount">0 jobs</span>
+    </div>
+
+    <!-- SUMMARY NOTE -->
+    <div class="summary-note" id="summaryNote"></div>
+
+    <!-- JOB LIST -->
+    <div class="job-list" id="jobList">
+      <div class="empty-state">
+        <div class="empty-icon">◎</div>
+        <h3>Ready to search</h3>
+        <p>Set your filters on the left, add your API key at the top, then click Search Jobs.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <h3>How to use JobRadar</h3>
+    <p>
+      <strong style="color:var(--accent)">Step 1 — Get your API key</strong><br>
+      Go to <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a>, create an account, then go to API Keys and create a new key. Paste it in the field at the top of this page. It stays in your browser only.<br><br>
+      <strong style="color:var(--accent)">Step 2 — Set your filters</strong><br>
+      Use the left sidebar to choose which job titles, sources, language requirements, and skills to search for. Everything is pre-set for your profile already.<br><br>
+      <strong style="color:var(--accent)">Step 3 — Search</strong><br>
+      Click the Search Jobs button. Claude will search job portals, read each listing, score it against your CV, and show the results here. Each run may take 1–2 minutes.<br><br>
+      <strong style="color:var(--accent)">Step 4 — Review & Apply</strong><br>
+      Browse Strong Matches (score 5+) and Possible Matches (score 3–4). Click Apply Now to open the job link.
+    </p>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="closeHelp()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let allJobs = [];
+let activeTab = 'strong';
+let isLoading = false;
+
+// ── STORAGE ──
+function saveJobs() {
+  try {
+    localStorage.setItem('jobradar_jobs', JSON.stringify(allJobs));
+  } catch(e) {}
+}
+function loadJobs() {
+  try {
+    const d = localStorage.getItem('jobradar_jobs');
+    if (d) allJobs = JSON.parse(d);
+  } catch(e) { allJobs = []; }
+}
+
+// ── HELPERS ──
+function getChecked(groupId) {
+  const inputs = document.querySelectorAll(`#${groupId} input[type=checkbox]:checked`);
+  return Array.from(inputs).map(i => i.value);
+}
+function getCheckedByName(name) {
+  const inputs = document.querySelectorAll(`input[type=checkbox][value="${name}"]:checked`);
+  return inputs.length > 0;
+}
+function getAllChecked(selector) {
+  return Array.from(document.querySelectorAll(selector + ':checked')).map(i => i.value);
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  const icons = { success: '✓', error: '✕', info: '◆' };
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type]}</span> ${msg}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function setProgress(pct) {
+  const w = document.getElementById('progressWrap');
+  const b = document.getElementById('progressBar');
+  if (pct > 0) { w.classList.add('active'); b.style.width = pct + '%'; }
+  else { setTimeout(() => { w.classList.remove('active'); b.style.width = '0%'; }, 400); }
+}
+
+function openHelp() { document.getElementById('helpModal').classList.add('open'); }
+function closeHelp() { document.getElementById('helpModal').classList.remove('open'); }
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabStrong').classList.toggle('active', tab === 'strong');
+  document.getElementById('tabPossible').classList.toggle('active', tab === 'possible');
+  renderJobs();
+}
+
+function clearResults() {
+  allJobs = [];
+  saveJobs();
+  renderJobs();
+  updateStats();
+  document.getElementById('summaryNote').classList.remove('show');
+  showToast('Results cleared', 'info');
+}
+
+// ── BUILD PROMPT ──
+function buildPrompt() {
+  const titles = getChecked('titleFilters');
+  const sources = getAllChecked('.sidebar input[type=checkbox][id^=src]:checked');
+  // collect all sidebar source checkboxes
+  const srcChecked = ['linkedin','indeed','stepstone','glassdoor','company']
+    .filter(s => document.getElementById('src-' + s)?.checked)
+    .map(s => ({ linkedin:'LinkedIn Jobs', indeed:'Indeed Germany', stepstone:'Stepstone', glassdoor:'Glassdoor', company:'Company Portals (DAX 150)' }[s]));
+
+  const minScore = document.getElementById('minScore').value;
+  const maxGerman = document.getElementById('maxGermanLevel').value;
+  const location = document.getElementById('locationFilter').value;
+  const empTypes = getAllChecked('.sidebar input[type=checkbox][value="Full-time"], .sidebar input[type=checkbox][value="Working Student"], .sidebar input[type=checkbox][value="Part-time"]');
+  const expLevels = getAllChecked('.sidebar input[type=checkbox][value="0-1"], .sidebar input[type=checkbox][value="0-3"], .sidebar input[type=checkbox][value="3-5"], .sidebar input[type=checkbox][value="5+"]');
+  const techSkills = getAllChecked('.sidebar input[type=checkbox][value="SAP"], .sidebar input[type=checkbox][value="Power BI"], .sidebar input[type=checkbox][value="Advanced Excel"], .sidebar input[type=checkbox][value="Odoo"], .sidebar input[type=checkbox][value="SAP BW"], .sidebar input[type=checkbox][value="any-skills"]');
+  const langPrefs = getAllChecked('.sidebar input[type=checkbox][value="en-only"], .sidebar input[type=checkbox][value="en-de"], .sidebar input[type=checkbox][value="de-only"]');
+
+  const existingLinks = allJobs.map(j => j.link).filter(Boolean);
+
+  return `You are a job search assistant for Romario Joydhor. His full CV is at:
+https://github.com/romario2jb/master-cv/blob/main/master_cv.tex
+
+Profile summary:
+- Commercial Finance & Business Partnering professional, based in Berlin, Germany
+- English: C2 | German: B2
+- Skills: SAP S/4HANA, SAC, Power BI, Advanced Excel, Odoo, FP&A, Controlling, Business Partnering, Budgeting, Forecasting, IFRS/HGB/US GAAP
+- Available immediately, valid German work authorization
+- Target location: ${location}
+
+YOUR TASK:
+Search the following sources for open job listings:
+${srcChecked.join(', ')}
+
+Search for these job titles:
+${titles.join(', ')}
+
+FILTERS TO APPLY BEFORE SCORING:
+- Only include: ${empTypes.join(', ')} positions
+- Experience required: ${expLevels.join(' or ')} years
+- Location: ${location}
+- Maximum German level required: ${maxGerman}
+- Language preferences: ${langPrefs.join(', ')}
+- Minimum score: ${minScore}/10
+
+SCORING RULES (out of 10):
+(a) CV Match: 4pts = excellent match, 2pts = mostly matching, 0pts = weak
+(b) Employment type: 1pt = full-time permanent, 0pts = other
+(c) Language: 2pts = English only (German not above B2), 1pt = both English+German above B2, 0pts = German only
+(d) Tech skills: 1pt if job requires any of: ${techSkills.join(', ')}
+(e) Experience: 1pt = 0-3 years required, 0pts = 4+ years
+
+DEDUPLICATION:
+Skip any job with these application links (already found):
+${existingLinks.length > 0 ? existingLinks.join('\n') : '(none yet — this is the first run)'}
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON array. No markdown, no explanation, no text before or after.
+Each object must have exactly these fields:
+{
+  "title": "exact job title",
+  "company": "company name",
+  "link": "direct application URL or job listing URL",
+  "score": 7,
+  "scoreBreakdown": "4 CV match + 1 full-time + 1 language + 1 SAP = 7",
+  "language": "German: B2 | English: C1",
+  "employmentType": "Full-time",
+  "experienceRequired": "2-3 years",
+  "techSkills": ["SAP", "Power BI"],
+  "source": "LinkedIn",
+  "location": "Berlin, Germany",
+  "postedDate": "2026-06-01 or approximate like June 2026",
+  "industry": "Manufacturing",
+  "sheet": "strong"
+}
+
+Set "sheet" to "strong" if score >= 5, "possible" if score 3-4. Omit jobs with score <= 2.
+Find at least 15-25 real, current job listings. Return ONLY the JSON array.`;
+}
+
+// ── SEARCH ──
+async function runSearch() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    showToast('Please enter your Anthropic API key first', 'error');
+    document.getElementById('apiKey').focus();
+    return;
+  }
+
+  if (isLoading) return;
+  isLoading = true;
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#0c0f1a;border-radius:50%;animation:spin .6s linear infinite"></div> Searching…`;
+
+  const list = document.getElementById('jobList');
+  list.innerHTML = `
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-msg" id="loadMsg">Reading your CV…</div>
+      <div class="loading-sub">This usually takes 60–90 seconds</div>
+    </div>`;
+
+  const msgs = [
+    'Reading your CV…',
+    'Searching LinkedIn Jobs…',
+    'Searching Indeed Germany…',
+    'Searching Stepstone…',
+    'Checking company portals…',
+    'Scoring each listing against your profile…',
+    'Applying filters…',
+    'Deduplicating results…',
+    'Almost done…'
+  ];
+  let msgIdx = 0;
+  setProgress(5);
+  const msgTimer = setInterval(() => {
+    msgIdx = Math.min(msgIdx + 1, msgs.length - 1);
+    const el = document.getElementById('loadMsg');
+    if (el) el.textContent = msgs[msgIdx];
+    setProgress(Math.min(10 + msgIdx * 10, 85));
+  }, 9000);
+
+  try {
+    const prompt = buildPrompt();
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-5',
+        max_tokens: 4096,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    clearInterval(msgTimer);
+    setProgress(90);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    // extract text from response (handle tool_use responses too)
+    let rawText = '';
+    for (const block of (data.content || [])) {
+      if (block.type === 'text') rawText += block.text;
+    }
+
+    // parse JSON from response
+    let newJobs = [];
+    const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      newJobs = JSON.parse(jsonMatch[0]);
+    } else {
+      throw new Error('No job data found in response. Try again.');
+    }
+
+    // deduplicate against existing
+    const existingLinks = new Set(allJobs.map(j => j.link).filter(Boolean));
+    const existingKeys = new Set(allJobs.map(j => `${j.company}||${j.title}`));
+    const unique = newJobs.filter(j => {
+      if (j.link && existingLinks.has(j.link)) return false;
+      if (existingKeys.has(`${j.company}||${j.title}`)) return false;
+      return true;
+    });
+
+    // add timestamps and IDs
+    const ts = new Date().toISOString().slice(0,10);
+    unique.forEach((j, i) => {
+      j.id = Date.now() + i;
+      j.foundDate = j.postedDate || ts;
+      j.saved = false;
+    });
+
+    allJobs = [...allJobs, ...unique];
+    saveJobs();
+    setProgress(100);
+
+    const strongCount = unique.filter(j => j.score >= 5).length;
+    const possibleCount = unique.filter(j => j.score >= 3 && j.score < 5).length;
+    const discarded = newJobs.length - unique.length;
+
+    const note = document.getElementById('summaryNote');
+    note.innerHTML = `<strong>Run complete.</strong> Found ${newJobs.length} listings — <strong>${unique.length} new</strong> added (${strongCount} strong, ${possibleCount} possible). ${discarded > 0 ? `${discarded} duplicates skipped.` : ''} Total in tracker: ${allJobs.length}.`;
+    note.classList.add('show');
+
+    renderJobs();
+    updateStats();
+    showToast(`${unique.length} new jobs added!`, 'success');
+
+  } catch (err) {
+    clearInterval(msgTimer);
+    setProgress(0);
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">!</div>
+        <h3>Search failed</h3>
+        <p>${err.message || 'Something went wrong. Check your API key and try again.'}</p>
+      </div>`;
+    showToast(err.message || 'Search failed', 'error');
+  } finally {
+    isLoading = false;
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search Jobs`;
+    setTimeout(() => setProgress(0), 600);
+  }
+}
+
+// ── RENDER ──
+function getFilteredAndSorted() {
+  const minScore = parseInt(document.getElementById('minScore').value);
+  const sort = document.getElementById('sortSelect').value;
+  const tab = activeTab;
+
+  let jobs = allJobs.filter(j => {
+    if (tab === 'strong'   && j.score < 5)  return false;
+    if (tab === 'possible' && (j.score < 3 || j.score >= 5)) return false;
+    if (j.score < minScore) return false;
+    return true;
+  });
+
+  jobs.sort((a, b) => {
+    if (sort === 'score-desc') return b.score - a.score;
+    if (sort === 'score-asc')  return a.score - b.score;
+    if (sort === 'date-desc')  return (b.foundDate||'').localeCompare(a.foundDate||'');
+    if (sort === 'company-asc') return (a.company||'').localeCompare(b.company||'');
+    if (sort === 'title-asc')   return (a.title||'').localeCompare(b.title||'');
+    return 0;
+  });
+
+  return jobs;
+}
+
+function renderJobs() {
+  const jobs = getFilteredAndSorted();
+  const list = document.getElementById('jobList');
+
+  const strongAll = allJobs.filter(j => j.score >= 5);
+  const possibleAll = allJobs.filter(j => j.score >= 3 && j.score < 5);
+  document.getElementById('countStrong').textContent = strongAll.length;
+  document.getElementById('countPossible').textContent = possibleAll.length;
+  document.getElementById('resultCount').textContent = `${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
+
+  if (jobs.length === 0 && allJobs.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">◎</div>
+        <h3>Ready to search</h3>
+        <p>Set your filters on the left, add your API key at the top, then click Search Jobs.</p>
+      </div>`;
+    return;
+  }
+
+  if (jobs.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">∅</div>
+        <h3>No jobs in this view</h3>
+        <p>Try switching tabs or lowering the minimum score filter.</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = jobs.map(j => buildCard(j)).join('');
+}
+
+function buildCard(j) {
+  const isHigh = j.score >= 5;
+  const scoreClass = isHigh ? 'high' : 'mid';
+  const cardClass  = isHigh ? 'score-high' : 'score-mid';
+
+  const techTags = (j.techSkills || []).map(s =>
+    `<span class="tag tool">${s}</span>`).join('');
+
+  const langTag = j.language
+    ? `<span class="tag lang-en">${j.language}</span>` : '';
+
+  const typeTag = j.employmentType
+    ? `<span class="tag type">${j.employmentType}</span>` : '';
+
+  const expTag = j.experienceRequired
+    ? `<span class="tag exp">${j.experienceRequired}</span>` : '';
+
+  const sourceTag = j.source
+    ? `<span class="tag source">${j.source}</span>` : '';
+
+  const dateTag = j.foundDate
+    ? `<span class="tag date">${j.foundDate}</span>` : '';
+
+  const savedClass = j.saved ? 'saved' : '';
+  const savedText  = j.saved ? '✓ Saved' : 'Save';
+
+  const breakdown = j.scoreBreakdown
+    ? `<div style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;margin-top:4px">${j.scoreBreakdown}</div>` : '';
+
+  return `
+  <div class="job-card ${cardClass}" id="card-${j.id}">
+    <div class="score-badge ${scoreClass}">
+      ${j.score}<span>/10</span>
+    </div>
+    <div class="job-body">
+      <div class="job-title">${j.title || 'Untitled Role'}</div>
+      <div class="job-company">
+        <strong>${j.company || '—'}</strong>
+        ${j.location ? `· ${j.location}` : ''}
+        ${j.industry ? `· ${j.industry}` : ''}
+      </div>
+      <div class="job-tags">
+        ${typeTag}${langTag}${expTag}${techTags}${sourceTag}${dateTag}
+      </div>
+      ${breakdown}
+    </div>
+    <div class="job-actions">
+      ${j.link
+        ? `<a class="btn-apply" href="${j.link}" target="_blank" rel="noopener">Apply Now ↗</a>`
+        : `<span class="btn-apply" style="opacity:.4;cursor:default">No link</span>`}
+      <button class="btn-save ${savedClass}" onclick="toggleSave(${j.id})">${savedText}</button>
+    </div>
+  </div>`;
+}
+
+function toggleSave(id) {
+  const job = allJobs.find(j => j.id === id);
+  if (!job) return;
+  job.saved = !job.saved;
+  saveJobs();
+  const btn = document.querySelector(`#card-${id} .btn-save`);
+  if (btn) {
+    btn.classList.toggle('saved', job.saved);
+    btn.textContent = job.saved ? '✓ Saved' : 'Save';
+  }
+  showToast(job.saved ? 'Job saved!' : 'Removed from saved', job.saved ? 'success' : 'info');
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = allJobs.length;
+  document.getElementById('statStrong').textContent = allJobs.filter(j => j.score >= 5).length;
+  document.getElementById('statPossible').textContent = allJobs.filter(j => j.score >= 3 && j.score < 5).length;
+  document.getElementById('statDiscarded').textContent = 0;
+}
+
+// ── INIT ──
+window.addEventListener('click', e => {
+  if (e.target === document.getElementById('helpModal')) closeHelp();
+});
+
+loadJobs();
+renderJobs();
+updateStats();
+</script>
+</body>
+</html>
